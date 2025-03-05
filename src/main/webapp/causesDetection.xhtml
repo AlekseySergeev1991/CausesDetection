@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+   <h:outputStylesheet name="teconToolbarStyle.css" library="css"/>
+   <h:outputStylesheet name="objTreeStyle.css" library="css"/>
+   <h:outputStylesheet name="style.css" library="css"/>
+   <h:outputStylesheet name="/font-awesome/6.4.2/css/all.min-jsf.css" library="webjars"/>
+   <h:outputStylesheet name="/font-awesome/6.4.2/css/v4-shims.min-jsf.css" library="webjars"/>
+   <h:outputScript name="script.js" library="js" />
+   <h:outputScript name="inFrameCheck.js" library="js" />
+
+</h:head>
+<h:body style="height: 100%; margin: 0" >
+   <p:growl id="growl" showDetail="true" />
+
+   <h:form>
+      <p:remoteCommand autoRun="true" onstart="iframeStatus([{name:'inIframe', value:inIframe()}]);" />
+      <p:remoteCommand name="iframeStatus" action="#{causesDetectionMB.changeInIframe()}"/>
+   </h:form>
+
+   <h:form id="causesDetectionForm" style="height: 100%; display: flex; flex-direction: column; position: fixed">
+
+      <div id="toolbar">
+
+         <div id="formName" style="justify-content: space-around">
+            <h:outputText value="ВЫЯВЛЕНИЕ ОТКЛОНЕНИЙ"/>
+         </div>
+
+         <div id="toolbarTable" >
+            <div style="min-width: 310px;" class="customTD">
+               <div class="contentField">
+                  <h:panelGroup style="width: 100%; height: 100%" layout="block" id="period">
+                     <div style="display: flex; flex-direction: row">
+                        <div style="width: 100px; margin-left: 4px; margin-top: 2px">
+                           <p:outputLabel value="Период" style="background-color: white; height: 29px;
+                                  border-radius: .2rem; border: 1px solid #6b7281; display: flex; align-items: center;
+                                  padding: 5px; font-size: .9rem; font-weight: 400; justify-content: start;
+                                  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue,
+                                  Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji "/>
+                        </div>
+                        <div style="height: 32px; width: 203px;">
+                           <p:datePicker id="month" view="month" value="#{causesDetectionMB.date}" pattern="MM/yyyy" yearNavigator="true"
+                                         yearRange="2000:2050" style="height: 32px; padding: 0; width: 203px; " locale="ru"
+                                         rendered="#{causesDetectionMB.timePeriod eq 'm' ? true : false}">
+                              <p:ajax process="@this" event="valueChange" onstart="PF('statusDialog').show();"
+                                      onsuccess="PF('statusDialog').hide();"
+                                      listener="#{causesDetectionMB.periodChangeMonth()}"/>
+                           </p:datePicker>
+
+                           <h:selectOneMenu value="#{causesDetectionMB.strDate}" rendered="#{causesDetectionMB.timePeriod eq 'y' ? true : false}"
+                                            style="height: 29px; padding: 0; width: 203px; margin-top: 2px; border-radius: .2rem;
+                                                     border: 1px solid #6b7281; color: #495057; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto , Helvetica Neue,  Arial, Noto Sans, sans-serif,
+                                 Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji; font-size: .9rem;">
+                              <p:ajax event="valueChange"  onstart="PF('statusDialog').show();"
+                                      onsuccess="PF('statusDialog').hide();"
+                                      listener="#{causesDetectionMB.periodChangeYear()}"/>
+                              <f:selectItems value="#{causesDetectionMB.yearsList}" var="yearsList"
+                                             itemLabel="#{yearsList}" itemValue="#{yearsList}"/>
+                           </h:selectOneMenu>
+
+                        </div>
+
+                     </div>
+
+                     <div style="display: flex; flex-direction: row">
+                        <div style="width: 100px; margin-left: 4px; margin-top: 2px">
+                           <p:outputLabel value="Интервал" style="background-color: white; height: 29px;
+                                  border-radius: .2rem; border: 1px solid #6b7281; display: flex; align-items: center;
+                                  padding: 5px; font-size: .9rem; font-weight: 400; justify-content: start;
+                                  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue,
+                                  Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji "/>
+                        </div>
+                        <div style="height: 32px; width: 203px;">
+                           <h:selectOneMenu style="width:100%; height: 1.8rem; margin-top: 2px; text-align: start; font-size: 1rem; text-overflow: ellipsis; border-radius: .2rem;
+                                 color: #495057; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto , Helvetica Neue,  Arial, Noto Sans, sans-serif,
+                                 Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji" value="#{causesDetectionMB.timePeriod}">
+                              <f:selectItem itemLabel="Месяц" itemValue="m"/>
+                              <f:selectItem itemLabel="Год" itemValue="y"/>
+                              <p:ajax event="valueChange" onstart="PF('statusDialog').show();"
+                                      onsuccess="PF('statusDialog').hide();"
+                                      listener="#{causesDetectionMB.intervalChange()}"/>
+                           </h:selectOneMenu>
+                        </div>
+                     </div>
+                  </h:panelGroup>
+
+               </div>
+               <div class="botField">
+                  <div class="botTextField">
+                     <h:outputText value="Календарь" styleClass="toolbarBottomText"/>
+                  </div>
+                  <div>
+                     <i class="fa fa-calendar customIcon"/>
+                  </div>
+               </div>
+            </div>
+
+            <div class="customTD" style="width: inherit;">
+               <div class="contentField" style="padding-bottom: 10px; padding-left: 2px; padding-right: 2px;">
+                  <div style="width: 100%; height: 100%;">
+                     <p:selectOneListbox id="basic" value="#{causesDetectionMB.alg}" style="height: 100%; padding: 0; text-overflow: ellipsis; white-space: nowrap; ">
+                        <f:selectItem itemLabel="Выявление и устранение причин завышения температуры ГВС Т7 и/или циркуляционного расхода горячей воды G13" itemValue="high" />
+                        <f:selectItem itemLabel="Выявление и устранение причин занижения температуры Т3 и/или изменения циркуляционных расходов воды в системах отопления" itemValue="low"/>
+
+                        <p:ajax event="valueChange" listener="#{causesDetectionMB.algChange()}" onstart="PF('statusDialog').show();"
+                                onsuccess="PF('statusDialog').hide();"/>
+                     </p:selectOneListbox>
+                  </div>
+               </div>
+               <div class="botField">
+                  <div class="botTextField">
+                     <h:outputText value="Установки и параметры" styleClass="toolbarBottomText"/>
+                  </div>
+                  <div>
+                     <i class="fa fa-sliders fa-rotate-90 customIcon"/>
+                  </div>
+               </div>
+            </div>
+
+            <div class="customTD customCursor" style="min-width: 60px;" onclick="PF('archiveTable').show();">
+               <div class="contentField">
+                  <h:outputText value="Пуск" styleClass="customToolbarButtonText"/>
+                  <ui:insert name="start"/>
+               </div>
+               <div class="botField">
+                  <div>
+                     <i class="fa fa-power-off customIcon"/>
+                  </div>
+               </div>
+            </div>
+
+            <div class="standardTD" style="min-width: 60px;">
+               <div class="contentField">
+                  <h:outputText value="Переход" styleClass="customToolbarButtonText"/>
+                  <ui:insert name="transition"/>
+               </div>
+               <div class="botField">
+                  <div>
+                     <i class="fa fa-sitemap fa-rotate-270 customIcon"/>
+                  </div>
+               </div>
+            </div>
+
+            <div class="standardTD" style="min-width: 60px;" >
+               <div class="contentField">
+                  <h:outputText value="График" styleClass="customToolbarButtonText"/>
+                  <ui:insert name="graph"/>
+               </div>
+               <div class="botField">
+                  <div>
+                     <i class="fa fa-bar-chart customIcon"/>
+                  </div>
+               </div>
+            </div>
+
+            <h:panelGroup class="customTD customCursor" style="min-width: 60px;" id="report" layout="block">
+
+               <div class="contentField">
+                  <h:outputText value="Отчет" styleClass="customToolbarButtonText"/>
+
+               </div>
+               <div class="botField">
+
+                  <div>
+                     <i class="fa fa-clone customIcon"/>
+                  </div>
+               </div>
+               <p:ajax event="click" listener="#{causesDetectionMB.createReport()}" process="@this" />
+
+            </h:panelGroup>
+
+         </div>
+      </div>
+
+      <div  style="height: calc(100% - 93px); margin-top: 5px;">
+         <div style="height: 100%; display: flex; flex-direction: row;">
+            <div style="width: 17.8%; min-width: 21rem; display: flex; flex-direction: column">
+               <div style="width: 5rem; background-color: #d9d9d9; height: 1.8rem; border-radius: .25rem .25rem 0 0;">
+                  <i class="fa fa-sitemap customTreeIcon" style="margin-left: 2rem; margin-top: 0.8rem;"/>
+               </div>
+
+               <table style="padding: .25rem; background-color: #d9d9d9;">
+                  <tr>
+                     <td style="width: 6.4rem;">
+                        <div style="width: 100%;  height: 32px">
+                           <p:outputLabel value="Тип объектов" style="background-color: rgba(118, 121, 129, .61); height: 32px;
+                                  border-radius: .2rem; border: 1px solid #6b7281; display: flex; align-items: center;
+                                  padding: 5px; font-size: .875rem; font-weight: 400;
+                                  font-family: Helvetica;"/>
+                        </div>
+                     </td>
+                     <td>
+                        <div>
+                           <h:selectOneMenu style="width:100%; height: 2rem; text-align: center; font-size: 1rem; text-overflow: ellipsis; border-radius: .2rem;
+                                 color: #495057; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto , Helvetica Neue,  Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji">
+                              <f:selectItem itemLabel="Центральный тепловой пункт" itemValue="Центральный тепловой пункт"/>
+
+                           </h:selectOneMenu>
+                        </div>
+                     </td>
+                  </tr>
+               </table>
+
+
+               <p:tree value="#{causesDetectionMB.root}" widgetVar="treeTable" var="structTree" id="treeTableId"
+                       selectionMode="single" selection="#{causesDetectionMB.selectedStructNode}"
+                       style="height: 100%; overflow: auto; background-color: #d9d9d9;" class="tc-custom-scroll">
+
+                  <p:ajax event="select"
+                          listener="#{causesDetectionMB.selectNode}" onstart="PF('statusDialog').show();"
+                          onsuccess="PF('statusDialog').hide();"/>
+
+                  <p:treeNode>
+                     <i class="#{structTree.myIcon}" id="icon"
+                        style="vertical-align: middle; margin: 0 .5rem 0 0; "/>
+                     <h:outputText value="#{structTree.name}" style="padding: .286em;"/>
+                  </p:treeNode>
+
+               </p:tree>
+
+               <h:panelGroup id="empty" rendered="#{causesDetectionMB.structTreeListIsEmpty}" layout="block" style="background-color: #d9d9d9;
+               display: flex; justify-content: center;">
+                  <h:outputText  value="Объекты не найдены..." style="display: flex; width: 19.7rem; background-color: #cce5ff;
+                  padding: .75rem 1.25rem; margin: .5rem .5rem 0; color: #004085; border-color: #b8daff; border-radius: .25rem; font-size: .92rem;"/>
+               </h:panelGroup>
+
+               <table style="padding: .25rem; background-color: #d9d9d9; width: 100%">
+                  <tr>
+                     <td style="width: 8.3rem; min-width: 8.3rem;">
+                        <div style="width: 100%;  height: 32px">
+                           <p:outputLabel value="Свойство объекта" style="background-color: rgba(118, 121, 129, .61); height: 32px;
+                                     border-radius: .2rem; border: 1px solid #6b7281; display: flex; align-items: center;
+                                     padding: 5px; font-size: .875rem; font-weight: 400;
+                                     font-family: Helvetica;"/>
+                        </div>
+                     </td>
+                     <td>
+
+                        <div>
+                           <h:selectOneMenu value="#{causesDetectionMB.selectedProp}"
+                                            style="width:100%; height: 2rem; max-width: 12rem; text-align: left; font-size: 0.875rem; text-overflow: ellipsis; border-radius: .2rem;
+                                        color: #495057; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto , Helvetica Neue,  Arial, Noto Sans,
+                                        sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji; border-color: black;">
+                              <f:ajax event="valueChange"
+                                      listener="#{causesDetectionMB.selectProp}"/>
+                              <f:converter converterId="paramConverter"/>
+                              <f:selectItems value="#{causesDetectionMB.propList}" var="objType"
+                                             itemLabel="#{objType.propName}" itemValue="#{objType}"/>
+                           </h:selectOneMenu>
+                        </div>
+                     </td>
+                  </tr>
+               </table>
+
+               <h:panelGroup style=" background-color: #d9d9d9; width: 100%" layout="block">
+                  <p:inputText value="#{causesDetectionMB.filterWord}" style="height: 2rem; width: 96%; margin-left: 5px;
+                         margin-bottom: 10px; border-color: black;" placeholder="Введите значение свойства для фильтрации"/>
+                  <p:ajax event="keyup" listener="#{causesDetectionMB.filtering()}" global="false" process="@this" delay="600" onstart="PF('navigateAllBui').show();" oncomplete="PF('navigateAllBui').hide();"/>
+               </h:panelGroup>
+            </div>
+
+            <p:blockUI block="treeTableId" widgetVar="navigateAllBui"/>
+
+            <div style="height: 100%; display: flex; flex-direction: column; ">
+
+               <div style="display: flex; flex-direction: row; width: 100%; height: 88px; background-color: #f8f9fa">
+                  <div style="display: flex; flex-direction: column; width: 40%; text-align: end">
+                     <p:outputLabel value="Нормативные величины (константы):"/>
+                     <p:outputLabel value="Температур внутреннего воздуха, Твв:"/>
+                     <p:outputLabel value="Расчетная температура наружного воздуха, Тнв.р:"/>
+                  </div>
+                  <p:dataTable id="leftSide" var="leftSide" widgetVar="leftSide" value="#{causesDetectionMB.leftSide}"
+                               showGridlines="true" styleClass="noHeader"
+                               rowKey="#{leftSide.id}" style="width: 5%; margin-top: 21px; margin-left: 1px; margin-right: 1px;" >
+
+                     <p:column style="text-align: center" styleClass="#{leftSide.getCustomColor() eq '1' ? 'customCellStyle' : ''}">
+                        <h:outputText style="display: block;" value="#{leftSide.value}"/>
+                     </p:column>
+
+                  </p:dataTable>
+
+                  <div style="display: flex; flex-direction: column; width: 5%">
+                     <br/>
+                     <p:outputLabel value="℃"/>
+                     <p:outputLabel value="℃"/>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; width: 19% ; text-align: end">
+                     <p:outputLabel value="Тариф на продажу ТЭ, Wтэ.р:"/>
+                     <p:outputLabel value="Тариф на покупную тепловую энергию, Wтэ:"/>
+                  </div>
+                  <p:dataTable id="rightSide" var="rightSide" widgetVar="rightSide" value="#{causesDetectionMB.rightSide}"
+                               showGridlines="true" styleClass="noHeader"
+                               rowKey="#{rightSide.id}" style="width: 5%; margin-left: 1px; margin-right: 1px;">
+
+                     <p:column style="text-align: center" styleClass="#{rightSide.getCustomColor() eq '1' ? 'customCellStyle' : ''}">
+                        <h:outputText style="display: block;" value="#{rightSide.value}"/>
+                     </p:column>
+
+                  </p:dataTable>
+
+                  <div style="display: flex; flex-direction: column; width: 26%">
+                     <p:outputLabel value="руб/Гкал"/>
+                     <p:outputLabel value="руб/Гкал"/>
+                  </div>
+               </div>
+
+               <div style="overflow: auto; height: 100%; margin-left: .5rem; width: calc(100% - .5rem)">
+                  <h:panelGroup style="height: 27px; width: 100%; text-align: start;" id="struct">
+                     <h:outputText value="#{causesDetectionMB.struct}" style="line-height: 30px; font-size: 20px; font-weight: 700;"/>
+                  </h:panelGroup>
+
+                  <h:panelGroup style="height: calc(100% - 30px); overflow: auto;" id="tableField" layout="block">
+
+                     <h:outputText value="Выберите объект для отображения архива значений" rendered="#{causesDetectionMB.noObjSelected}"
+                                   style="display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: red; height: 85%;
+                            text-transform: uppercase; font-weight: 700; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;"/>
+
+                     <p:dataTable id="heighTablel" var="heighData" widgetVar="heighTable1" value="#{causesDetectionMB.tableCausesHighList}"
+                                  showGridlines="true" scrollable="true" style="overflow-wrap: break-word; font-size: .75rem; border-color: black; table-layout: fixed;" scrollHeight="100%"
+                                  rowKey="#{heighData.filial}" rendered="#{causesDetectionMB.alg eq 'high' and !causesDetectionMB.noObjSelected}" paginator="true" rows="300"
+                                  paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                  currentPageReportTemplate="{startRecord}-{endRecord} из {totalRecords}"
+                                  rowsPerPageTemplate="150,300,750" paginatorPosition="bottom" styleClass="tableFont"
+                                  stickyHeader="true" stickyTopAt="#struct" >
+
+                        <p:column style="text-align: center; width: 74px" headerText="Филиал" >
+                           <h:outputText value="#{heighData.filial}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 100px" headerText="Предприятие" >
+                           <h:outputText value="#{heighData.pred}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 105px" headerText="ЦТП" >
+                           <h:outputText value="#{heighData.chp}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 58px" headerText="Дата" >
+                           <h:outputText value="#{heighData.date}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 4%" headerText="Т7баз, ℃" >
+                           <h:outputText value="#{heighData.t7_base}" />
+                        </p:column>
+                        <p:column style="text-align: center; width: 4%" headerText="Т13баз, ℃" >
+                           <h:outputText value="#{heighData.t13_base}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 4%" headerText="Т7тек, ℃">
+                           <h:outputText value="#{heighData.t7_now}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 4%" headerText="Т13тек, ℃" >
+                           <h:outputText value="#{heighData.t13_now}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 4.5%" headerText="G7баз, т⁄мес" >
+                           <h:outputText value="#{heighData.g7_base}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="G13баз, т⁄мес" >
+                           <h:outputText value="#{heighData.g13_base}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="G13тек, т⁄мес" >
+                           <h:outputText value="#{heighData.g13_now}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="Gвод, т⁄мес" >
+                           <h:outputText value="#{heighData.g_water}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 6.5%" headerText="Qф.баз.цирк, Гкал" >
+                           <h:outputText value="#{heighData.qf_base_circ}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5.7%" headerText="Qф.баз.вод, Гкал" >
+                           <h:outputText value="#{heighData.qf_base_vvod}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="Qф.баз., Гкал" >
+                           <h:outputText value="#{heighData.qf_base}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 6.5%" headerText="Qф.тек.цирк, Гкал" >
+                           <h:outputText value="#{heighData.qf_now_circ}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5.7%" headerText="Qф.тек.вод, Гкал" >
+                           <h:outputText value="#{heighData.qf_now_vvod}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="Qф.тек., Гкал" >
+                           <h:outputText value="#{heighData.qf_now}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 120px" headerText="Эффект по теплу, Гкал" >
+                           <h:outputText value="#{heighData.eff_heat_fiz}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 120px" headerText="Эффект по теплу, тыс.руб." >
+                           <h:outputText value="#{heighData.eff_heat_money}"/>
+                        </p:column>
+
+                        <f:facet name="footer">
+                           <p:dataTable id="coolantTotalTablel1" var="coolantTotalData" widgetVar="coolantTotalTable1" value="#{causesDetectionMB.total}"
+                                        style="table-layout: fixed; width: 100%;" >
+                              <p:column style="text-align: start; border-width: 1px; background-color: #BDF8AE; border-color: black; color: black;" >
+                                 <h:outputText value="#{coolantTotalData.filial}"/>
+                              </p:column>
+
+                              <p:column style="text-align: center; width: 120px; border-width: 1px; background-color: #BDF8AE; border-color: black; color: black;" >
+                                 <h:outputText value="#{coolantTotalData.eff_heat_fiz}"/>
+                              </p:column>
+                              <p:column style="text-align: center; width: 137px; border-width: 1px; background-color: #BDF8AE; border-color: black; color: black;" >
+                                 <h:outputText value="#{coolantTotalData.eff_heat_money}"/>
+                              </p:column>
+                           </p:dataTable>
+                        </f:facet>
+
+                     </p:dataTable>
+
+                     <p:dataTable id="lowTablel" var="lowData" widgetVar="lowTable1" value="#{causesDetectionMB.tableCausesLowList}"
+                                  showGridlines="true" scrollable="true" style="overflow-wrap: break-word; font-size: .75rem; border-color: black; table-layout: fixed;"  scrollHeight="100%"
+                                  rowKey="#{lowData.filial}" rendered="#{causesDetectionMB.alg eq 'low' and !causesDetectionMB.noObjSelected}" paginator="true" rows="300"
+                                  paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                  currentPageReportTemplate="{startRecord}-{endRecord} из {totalRecords}"
+                                  rowsPerPageTemplate="150,300,750" paginatorPosition="bottom" styleClass="tableFont"
+                                  stickyHeader="true" stickyTopAt="#struct">
+
+                        <p:column style="text-align: center; width: 79px" headerText="Филиал" >
+                           <h:outputText value="#{lowData.filial}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 105px" headerText="Предприятие">
+                           <h:outputText value="#{lowData.pred}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 105px" headerText="ЦТП">
+                           <h:outputText value="#{lowData.chp}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 4%" headerText="Дата" >
+                           <h:outputText value="#{lowData.date}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 4.5%" headerText="Период отчетный">
+                           <h:outputText value="#{lowData.rep_period}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="Qр, Гкал/час">
+                           <h:outputText value="#{lowData.qr}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="Тнв.ф.баз, ℃" >
+                           <h:outputText value="#{lowData.tnv_f_base}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 6%" headerText="Тнв.ф.отч, ℃" >
+                           <h:outputText value="#{lowData.tnv_f_rep}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="Qф.баз, Гкал⁄ч" >
+                           <h:outputText value="#{lowData.qf_base}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="Qф.отч, Гкал⁄ч">
+                           <h:outputText value="#{lowData.qf_rep}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="Qр.баз, Гкал⁄ч">
+                           <h:outputText value="#{lowData.qr_base}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="Qр.отч, Гкал⁄ч" >
+                           <h:outputText value="#{lowData.qr_rep}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="ΔQбаз, Гкал⁄ч" >
+                           <h:outputText value="#{lowData.dq_base}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="ΔQотч, Гкал⁄ч" >
+                           <h:outputText value="#{lowData.dq_rep}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="ΔQ, Гкал⁄ч" >
+                           <h:outputText value="#{lowData.dq}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 5%" headerText="ΔQприв, Гкал/ч" >
+                           <h:outputText value="#{lowData.dq_priv}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 120px" headerText="Эффект по теплу, Гкал" >
+                           <h:outputText value="#{lowData.eff_heat_fiz}"/>
+                        </p:column>
+                        <p:column style="text-align: center; width: 120px" headerText="Эффект по теплу, тыс.руб." >
+                           <h:outputText value="#{lowData.eff_heat_money}"/>
+                        </p:column>
+
+                        <f:facet name="footer">
+                           <p:dataTable id="coolantTotalTablel2" var="coolantTotalData" widgetVar="coolantTotalTable1" value="#{causesDetectionMB.total}"
+                                        style="table-layout: fixed; width: 100%;" >
+                              <p:column style="text-align: start; border-width: 1px; background-color: #BDF8AE; border-color: black; color: black;" >
+                                 <h:outputText value="#{coolantTotalData.filial}"/>
+                              </p:column>
+
+                              <p:column style="text-align: center; width: 120px; border-width: 1px; background-color: #BDF8AE; border-color: black; color: black;" >
+                                 <h:outputText value="#{coolantTotalData.eff_heat_fiz}"/>
+                              </p:column>
+                              <p:column style="text-align: center; width: 137px; border-width: 1px; background-color: #BDF8AE; border-color: black; color: black;" >
+                                 <h:outputText value="#{coolantTotalData.eff_heat_money}"/>
+                              </p:column>
+                           </p:dataTable>
+                        </f:facet>
+
+                     </p:dataTable>
+
+                  </h:panelGroup>
+
+               </div>
+            </div>
+         </div>
+      </div>
+   </h:form>
+
+   <p:dialog id="statusDialog" modal="true" widgetVar="statusDialog" draggable="false" closable="false"
+             resizable="false" style="box-shadow: none;" position="center center" onShow="PF('statusDialog').initPosition();">
+      <i class="pi pi-spinner pi-spin" style="font-size: 5rem;" />
+   </p:dialog>
+
+   <p:dialog id="archiveTable" header="Архивные отчеты" widgetVar="archiveTable" modal="true"
+             resizable="false" showEffect="fade" hideEffect="fade" width="650" height="500">
+
+      <p:dataTable id="archiveReportTable" var="archiveReportTable" widgetVar="archiveReportTable" value="#{causesDetectionMB.reportList}"
+                   style="overflow-wrap: break-word; border-color: black; table-layout: fixed;">
+         <p:column style="height: 25px; border-color: #f4f4f4" headerText="Тип алгоритма">
+            <h:outputText value="#{archiveReportTable.repType}"/>
+         </p:column>
+         <p:column width="100" style="text-align: center; height: 25px; border-color: #f4f4f4" headerText="Дата">
+            <h:outputText value="#{archiveReportTable.repDate}"/>
+         </p:column>
+         <p:column width="50" style="border-color: #f4f4f4">
+            <div onclick="window.open('#{archiveReportTable.redirect}')" style="display: flex; width: 25px; height: 25px;
+                         justify-content: center; margin-left: 10px; align-items: center;" class="customSave">
+               <i class="fa fa-save"/>
+            </div>
+         </p:column>
+      </p:dataTable>
+
+   </p:dialog>
+
+</h:body>
+</html>
