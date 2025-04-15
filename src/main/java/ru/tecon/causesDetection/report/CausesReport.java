@@ -1,11 +1,15 @@
 package ru.tecon.causesDetection.report;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import ru.tecon.causesDetection.ejb.CausesDetectionSB;
 import ru.tecon.causesDetection.model.TableCausesHigh;
 import ru.tecon.causesDetection.model.TableCausesLow;
@@ -18,7 +22,7 @@ import java.util.List;
 
 public class CausesReport {
 
-    public static SXSSFWorkbook createReport(int id, LocalDateTime timestampLDT, String interval, String user, String alg, int repType, CausesDetectionSB bean) {
+    public static SXSSFWorkbook createReport(int id, LocalDateTime timestampLDT, String interval, String user, String alg, int repType, CausesDetectionSB bean) throws DecoderException {
         SXSSFWorkbook wb;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         String timestamp = timestampLDT.format(formatter);
@@ -30,7 +34,7 @@ public class CausesReport {
         return wb;
     }
 
-    public static SXSSFWorkbook createHighReport(int id, String timestamp, String interval, String user, int repType, CausesDetectionSB bean) {
+    public static SXSSFWorkbook createHighReport(int id, String timestamp, String interval, String user, int repType, CausesDetectionSB bean) throws DecoderException {
         SXSSFWorkbook wb = new SXSSFWorkbook();
         SXSSFSheet sh = wb.createSheet("Отчет");
 
@@ -302,6 +306,10 @@ public class CausesReport {
 
             CellRangeAddress itogMerge = new CellRangeAddress(begRow, begRow, 0, 17);
             sh.addMergedRegion(itogMerge);
+            RegionUtil.setBorderBottom(BorderStyle.THIN, itogMerge, sh);
+            RegionUtil.setBorderTop(BorderStyle.THIN, itogMerge, sh);
+            RegionUtil.setBorderLeft(BorderStyle.THIN, itogMerge, sh);
+            RegionUtil.setBorderRight(BorderStyle.THIN, itogMerge, sh);
         } else {
             SXSSFRow row = sh.createRow(begRow);
             SXSSFCell cell_1 = row.createCell(0);
@@ -314,7 +322,7 @@ public class CausesReport {
         return wb;
     }
 
-    public static SXSSFWorkbook createLowReport(int id, String timestamp, String interval, String user, int repType, CausesDetectionSB bean) {
+    public static SXSSFWorkbook createLowReport(int id, String timestamp, String interval, String user, int repType, CausesDetectionSB bean) throws DecoderException {
         SXSSFWorkbook wb = new SXSSFWorkbook();
         SXSSFSheet sh = wb.createSheet("Отчет");
 
@@ -323,7 +331,6 @@ public class CausesReport {
         CellStyle nowStyle = setCellNow (wb);
         CellStyle tableHeaderStyle = setTableHeaderStyle(wb);
         CellStyle cellTableStyle = setCellTable(wb);
-
         CellStyle cellGStyleItog = setCellGStyleItog (wb);
 
 
@@ -417,7 +424,7 @@ public class CausesReport {
 
         SXSSFCell cell_7_6 = row_7.createCell(5);
         cell_7_6.setCellStyle(tableHeaderStyle);
-        cell_7_6.setCellValue("Qр, Гкал/час");
+        cell_7_6.setCellValue("Qр, Гкал/ч");
 
         SXSSFCell cell_7_7 = row_7.createCell(6);
         cell_7_7.setCellStyle(tableHeaderStyle);
@@ -568,6 +575,10 @@ public class CausesReport {
 
             CellRangeAddress itogMerge = new CellRangeAddress(begRow, begRow, 0, 15);
             sh.addMergedRegion(itogMerge);
+            RegionUtil.setBorderBottom(BorderStyle.THIN, itogMerge, sh);
+            RegionUtil.setBorderTop(BorderStyle.THIN, itogMerge, sh);
+            RegionUtil.setBorderLeft(BorderStyle.THIN, itogMerge, sh);
+            RegionUtil.setBorderRight(BorderStyle.THIN, itogMerge, sh);
         } else {
             SXSSFRow row = sh.createRow(begRow);
             SXSSFCell cell_1 = row.createCell(0);
@@ -687,7 +698,7 @@ public class CausesReport {
         return style;
     }
 
-    private static CellStyle setCellGStyleItog(SXSSFWorkbook p_wb) {
+    private static CellStyle setCellGStyleItog(SXSSFWorkbook p_wb) throws DecoderException {
         CellStyle style = p_wb.createCellStyle();
         style.setAlignment(HorizontalAlignment.LEFT);
         style.setVerticalAlignment(VerticalAlignment.CENTER);
@@ -705,7 +716,10 @@ public class CausesReport {
         cellNoBoldFont.setFontHeightInPoints((short) 11);
 
         style.setFont(cellNoBoldFont);
-        style.setFillForegroundColor(IndexedColors.GREEN.getIndex());
+        String rgbS = "BDF8AE";
+        byte [] rgbB = Hex.decodeHex(rgbS);
+        XSSFColor color = new XSSFColor(rgbB, null);
+        style.setFillForegroundColor(color);
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         style.setWrapText(true);
         return style;

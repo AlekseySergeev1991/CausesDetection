@@ -18,7 +18,7 @@ public class ParamConverter implements Converter {
     @Override
     public Object getAsObject(FacesContext context, UIComponent component, String value) {
         ValueExpression vex = context.getApplication().getExpressionFactory()
-                .createValueExpression(context.getELContext(), "#{errorDetectionMB}", CausesDetectionMB.class);
+                .createValueExpression(context.getELContext(), "#{causesDetectionMB}", CausesDetectionMB.class);
 
         CausesDetectionMB defaultValues = (CausesDetectionMB) vex.getValue(context.getELContext());
 

@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.codec.DecoderException;
 import ru.tecon.causesDetection.ejb.CausesDetectionSB;
 import ru.tecon.causesDetection.report.CausesReport;
 
@@ -137,6 +138,8 @@ public class LoadReportServlet extends HttpServlet {
             output.flush();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (DecoderException e) {
+            throw new RuntimeException(e);
         }
     }
 
